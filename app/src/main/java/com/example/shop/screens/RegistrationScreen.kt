@@ -1,5 +1,6 @@
 package com.example.shop.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,16 +18,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.shop.R
+import com.example.shop.viewmodel.AuthViewModel
 
 @Composable
-fun RegistrationScreen(modifier: Modifier = Modifier) {
+fun RegistrationScreen(modifier: Modifier = Modifier, authViewModel: AuthViewModel = viewModel()) {
     var name by remember {
         mutableStateOf("")
     }
@@ -36,6 +40,7 @@ fun RegistrationScreen(modifier: Modifier = Modifier) {
     var password by remember {
         mutableStateOf("")
     }
+    var context = LocalContext.current
     Column(modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally)
@@ -70,6 +75,14 @@ fun RegistrationScreen(modifier: Modifier = Modifier) {
             visualTransformation = PasswordVisualTransformation())
         Spacer(modifier = Modifier.height(20.dp))
         OutlinedButton(onClick = {
+            authViewModel.registration(email, name, password){
+                success, errorMessage->
+                if (success){
+                }
+                else{
+                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                }
+            }
         },
             modifier = Modifier.fillMaxWidth().height(50.dp)
         )
