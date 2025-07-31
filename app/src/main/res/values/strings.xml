@@ -9,4 +9,9 @@
     <string name="password">Passwrod</string>
     <string name="text_login_screen">Sign in</string>
     <string name="message_firebase_error">Somthing wrong</string>
+    <string name="button_logOut">Log out</string>
+    <string name="label_nav_shop">Shop</string>
+    <string name="label_nav_favorites">Favorutes</string>
+    <string name="label_nav_basket">Basket</string>
+    <string name="label_nav_profile">Profile</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.example.shop.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,22 +18,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.shop.R
+import com.example.shop.viewmodel.AuthViewModel
 
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier) {
+fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel = viewModel()) {
     var email by remember {
         mutableStateOf("")
     }
     var password by remember {
         mutableStateOf("")
     }
+    var isLoading by remember{
+        mutableStateOf(false)
+    }
+    var context = LocalContext.current
     Column(modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally)
@@ -61,7 +70,22 @@ fun LoginScreen(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(20.dp))
         OutlinedButton(onClick = {
+            isLoading = true
+            authViewModel.login(email, password){
+                    success, errorMessage->
+                if (success){
+                    isLoading = false
+                    navController.navigate("home"){
+                        popUpTo("auth"){inclusive = true}
+                    }
+                }
+                else{
+                    isLoading = false
+                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                }
+            }
         },
+            enabled = !isLoading,
             modifier = Modifier.fillMaxWidth().height(50.dp)
         )
         {

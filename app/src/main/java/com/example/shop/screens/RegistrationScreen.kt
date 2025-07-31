@@ -26,11 +26,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.shop.R
 import com.example.shop.viewmodel.AuthViewModel
 
 @Composable
-fun RegistrationScreen(modifier: Modifier = Modifier, authViewModel: AuthViewModel = viewModel()) {
+fun RegistrationScreen(modifier: Modifier = Modifier,navController: NavController, authViewModel: AuthViewModel = viewModel()) {
     var name by remember {
         mutableStateOf("")
     }
@@ -39,6 +40,9 @@ fun RegistrationScreen(modifier: Modifier = Modifier, authViewModel: AuthViewMod
     }
     var password by remember {
         mutableStateOf("")
+    }
+    var isLoading by remember{
+        mutableStateOf(false)
     }
     var context = LocalContext.current
     Column(modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -75,15 +79,22 @@ fun RegistrationScreen(modifier: Modifier = Modifier, authViewModel: AuthViewMod
             visualTransformation = PasswordVisualTransformation())
         Spacer(modifier = Modifier.height(20.dp))
         OutlinedButton(onClick = {
+            isLoading = true
             authViewModel.registration(email, name, password){
                 success, errorMessage->
                 if (success){
+                    isLoading = false
+                    navController.navigate("home"){
+                        popUpTo("auth"){inclusive = true}
+                    }
                 }
                 else{
+                    isLoading = false
                     Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                 }
             }
         },
+            enabled = !isLoading,
             modifier = Modifier.fillMaxWidth().height(50.dp)
         )
         {
