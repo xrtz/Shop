@@ -2,9 +2,11 @@ package com.example.shop
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.shop.pages.CategoryProductPage
 import com.example.shop.screens.AuthScreen
 import com.example.shop.screens.HomeScreen
 import com.example.shop.screens.LoginScreen
@@ -15,6 +17,7 @@ import com.google.firebase.auth.auth
 @Composable
 fun Navigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
+    GlobalNavigation.navController = navController
     val isLoginIn = Firebase.auth.currentUser != null
     val firstpage = if(isLoginIn) "home" else "auth"
     NavHost(navController = navController, startDestination = firstpage) {
@@ -30,5 +33,13 @@ fun Navigation(modifier: Modifier = Modifier) {
         composable("home"){
             HomeScreen(modifier, navController)
         }
+        composable("category-products/{categoryId}"){
+            var categoryId = it.arguments?.getString("categoryId")
+            CategoryProductPage(modifier, categoryId?:"")
+        }
     }
+}
+
+object GlobalNavigation{
+    lateinit var navController: NavHostController
 }
