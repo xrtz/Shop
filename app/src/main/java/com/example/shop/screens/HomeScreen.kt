@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,7 +49,7 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController) {
         NavItem(stringResource(R.string.label_nav_basket), Icons.Default.Favorite),
         NavItem(stringResource(R.string.label_nav_profile), Icons.Default.AccountCircle)
     )
-    var selectedBar by remember {
+    var selectedBar by rememberSaveable {
         mutableStateOf(0)
     }
     Scaffold (

@@ -8,4 +8,5 @@ data class ProductModel(
     val actualPrice : String = "",
     val price : String = "",
     val images : List<String> = emptyList(),
+    val otherDetails : Map<String, String> = mapOf()
 )
