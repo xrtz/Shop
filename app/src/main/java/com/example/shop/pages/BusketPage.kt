@@ -1,5 +1,6 @@
 package com.example.shop.pages
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.text.TextStyle
@@ -27,6 +29,7 @@ import com.example.shop.model.UserModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 @Composable
 fun BusketPage(modifier: Modifier = Modifier) {
@@ -49,15 +52,24 @@ fun BusketPage(modifier: Modifier = Modifier) {
     }
     Column(modifier = modifier.fillMaxSize().padding(16.dp)){
         Text(text = "Your basket", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-        LazyColumn(modifier = Modifier.weight(1f)) {
-            items(userModel.value.cartItems.toList(), key = {it.first}){ (productId, qty)->
-                BusketItemView(productId = productId, qty =  qty)
+        if (userModel.value.cartItems.isNotEmpty())
+        {
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                items(userModel.value.cartItems.toList(), key = {it.first}){ (productId, qty)->
+                    BusketItemView(productId = productId, qty =  qty)
+                }
+            }
+            OutlinedButton(onClick = {
+                GlobalNavigation.navController.navigate("checkout")
+            }, modifier = Modifier.fillMaxWidth().height(50.dp)) {
+                Text(text = "Checkout")
             }
         }
-        OutlinedButton(onClick = {
-            GlobalNavigation.navController.navigate("checkout")
-        }, modifier = Modifier.fillMaxWidth().height(50.dp)) {
-            Text(text = "Checkout")
+        else{
+            Column (modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center){
+                Text(text = "Empty")
+            }
         }
 
     }

@@ -1,5 +1,7 @@
 package com.example.shop.pages
 
+import android.app.Activity
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,10 +21,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.shop.GlobalNavigation
+import com.example.shop.Util
 import com.example.shop.model.ProductModel
 import com.example.shop.model.UserModel
 import com.google.firebase.Firebase
@@ -31,6 +37,7 @@ import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 @Composable
 fun CheckoutPage(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
     val userModel = remember{
         mutableStateOf(UserModel())
     }
@@ -93,7 +100,9 @@ fun CheckoutPage(modifier: Modifier = Modifier) {
                 }
             }
     }
-    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
+    Column(modifier = modifier
+        .fillMaxSize()
+        .padding(16.dp)) {
         Text(text = "Checkout", fontSize = 22.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(16.dp))
         Text(text = "Deliver to: ", fontWeight = FontWeight.Bold)
@@ -114,8 +123,17 @@ fun CheckoutPage(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(16.dp))
         HorizontalDivider()
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "To Pay", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-        Text(text = "${subTotal.value}", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(),
+        Text(text = "-> ${subTotal.value}", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(),
             fontSize = 22.sp, fontWeight = FontWeight.Bold)
+
+        OutlinedButton ( onClick = {
+            Util.clearBusketAndAddToOrder()
+            Toast.makeText(context, "Comlited", Toast.LENGTH_SHORT).show()
+            val navController = GlobalNavigation.navController
+            navController.popBackStack()
+            navController.navigate("busket")
+        }
+        ) {  Text(text = "To Pay", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())}
+
     }
 }

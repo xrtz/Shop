@@ -6,8 +6,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.shop.pages.BusketPage
 import com.example.shop.pages.CategoryProductPage
 import com.example.shop.pages.CheckoutPage
+import com.example.shop.pages.OrderPage
 import com.example.shop.pages.ProductDetailsPage
 import com.example.shop.screens.AuthScreen
 import com.example.shop.screens.HomeScreen
@@ -35,6 +37,9 @@ fun Navigation(modifier: Modifier = Modifier) {
         composable("home"){
             HomeScreen(modifier, navController)
         }
+        composable("busket"){
+            BusketPage(modifier)
+        }
         composable("category-products/{categoryId}"){
             var categoryId = it.arguments?.getString("categoryId")
             CategoryProductPage(modifier, categoryId?:"")
@@ -45,6 +50,9 @@ fun Navigation(modifier: Modifier = Modifier) {
         }
         composable("checkout"){
             CheckoutPage(modifier)
+        }
+        composable("orders"){
+            OrderPage(modifier)
         }
     }
 }
