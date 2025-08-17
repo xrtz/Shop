@@ -7,5 +7,6 @@ data class UserModel (
     val email: String = "",
     val Uid: String = "",
     val cartItems: Map<String, Long> = mapOf(),
-    val address: String = ""
+    val address: String = "",
+    val favItems: List<String> = listOf()
     )

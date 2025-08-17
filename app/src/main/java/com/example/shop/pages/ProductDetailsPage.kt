@@ -106,7 +106,9 @@ fun ProductDetailsPage(modifier: Modifier = Modifier, productId: String) {
                 fontSize = 20.sp
             )
             Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = {}) {
+            IconButton(onClick = {
+                Util.addToFav(context, productId)
+            }) {
                 Icon(imageVector = Icons.Default.FavoriteBorder,
                     contentDescription = "+ <3")
             }

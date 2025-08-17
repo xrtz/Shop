@@ -82,4 +82,28 @@ object Util {
             }
         }
     }
-}
+    fun addToFav(context: Context, productId: String){
+        val userDoc = Firebase.firestore.collection("users")
+            .document(FirebaseAuth.getInstance().currentUser?.uid!!)
+        userDoc.get().addOnCompleteListener{
+            if (it.isSuccessful){
+                val currentFav = it.result.get("favItems") as? List<String> ?: listOf()
+                val updatedFav = currentFav.toMutableList()
+                if (productId in updatedFav){
+                    updatedFav.remove(productId)
+                }
+                else{
+                updatedFav.add(productId)
+                }
+                userDoc.update("favItems", updatedFav)
+                    .addOnCompleteListener{
+                        if (it.isSuccessful){
+                            Toast.makeText(context, "+", Toast.LENGTH_SHORT).show()
+                        }else{
+                            Toast.makeText(context, "x", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        }
+    }
