@@ -11,6 +11,7 @@ import com.example.shop.pages.CategoryProductPage
 import com.example.shop.pages.CheckoutPage
 import com.example.shop.pages.OrderPage
 import com.example.shop.pages.ProductDetailsPage
+import com.example.shop.screens.AdminScreen
 import com.example.shop.screens.AuthScreen
 import com.example.shop.screens.HomeScreen
 import com.example.shop.screens.LoginScreen
@@ -36,6 +37,9 @@ fun Navigation(modifier: Modifier = Modifier) {
         }
         composable("home"){
             HomeScreen(modifier, navController)
+        }
+        composable("admin-home"){
+            AdminScreen(modifier, navController)
         }
         composable("busket"){
             BusketPage(modifier)

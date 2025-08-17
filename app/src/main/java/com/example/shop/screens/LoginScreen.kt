@@ -12,6 +12,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,7 +29,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.shop.R
+import com.example.shop.model.UserModel
 import com.example.shop.viewmodel.AuthViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.firestore
 
 @Composable
 fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel = viewModel()) {
@@ -41,6 +46,7 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, aut
     var isLoading by remember{
         mutableStateOf(false)
     }
+
     var context = LocalContext.current
     Column(modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.Center,
@@ -72,10 +78,16 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, aut
         OutlinedButton(onClick = {
             isLoading = true
             authViewModel.login(email, password){
-                    success, errorMessage->
-                if (success){
+                    success, errorMessage, admin->
+                if (success && !admin){
                     isLoading = false
                     navController.navigate("home"){
+                        popUpTo("auth"){inclusive = true}
+                    }
+                }
+                else if(success && admin){
+                    isLoading = false
+                    navController.navigate("admin-home"){
                         popUpTo("auth"){inclusive = true}
                     }
                 }
