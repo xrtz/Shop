@@ -1,5 +1,6 @@
 package com.example.shop.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,11 +17,12 @@ import com.google.firebase.firestore.firestore
 class AuthViewModel : ViewModel(){
     private val auth = Firebase.auth
     private val firestore = Firebase.firestore
+
     fun login(email: String, password: String, onResult : (Boolean, String?, Boolean)-> Unit){
         auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { it ->
+            if (it.isSuccessful) {
             Firebase.firestore.collection("users")
                 .document(FirebaseAuth.getInstance().currentUser?.uid!!).get().addOnCompleteListener { it2 ->
-                    if (it.isSuccessful) {
                         if (it2.isSuccessful) {
                             val result = it2.result.toObject(UserModel::class.java)
                             if (result != null) {
@@ -32,10 +34,11 @@ class AuthViewModel : ViewModel(){
                             onResult(false, it.exception?.localizedMessage, false)
                         }
                     }
-                    else{
-                        onResult(false, it.exception?.localizedMessage, false)
-                    }
+
                 }
+            else{
+                onResult(false, it.exception?.localizedMessage, false)
+            }
 
         }
     }

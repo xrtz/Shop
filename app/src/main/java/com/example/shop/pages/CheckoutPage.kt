@@ -131,7 +131,7 @@ fun CheckoutPage(modifier: Modifier = Modifier) {
             Toast.makeText(context, "Comlited", Toast.LENGTH_SHORT).show()
             val navController = GlobalNavigation.navController
             navController.popBackStack()
-            navController.navigate("busket")
+            navController.navigate("home")
         }
         ) {  Text(text = "To Pay", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())}
 

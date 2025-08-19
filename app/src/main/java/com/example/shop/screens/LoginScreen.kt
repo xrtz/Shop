@@ -94,6 +94,7 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, aut
                 else{
                     isLoading = false
                     Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                    navController.navigate("auth")
                 }
             }
         },

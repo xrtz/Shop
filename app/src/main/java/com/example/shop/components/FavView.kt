@@ -61,7 +61,9 @@ fun FavView(modifier: Modifier = Modifier, productId: String) {
 
     var context = LocalContext.current
     Card(
-        modifier = modifier.padding(8.dp).fillMaxWidth(),
+        modifier = modifier.padding(8.dp).fillMaxWidth().clickable {
+            GlobalNavigation.navController.navigate("product-details/" + product.id)
+        },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(8.dp)
