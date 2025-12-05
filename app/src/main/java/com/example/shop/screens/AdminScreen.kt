@@ -1,5 +1,6 @@
 package com.example.shop.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -49,6 +50,8 @@ import com.google.firebase.auth.auth
 
 @Composable
 fun AdminScreen(modifier: Modifier = Modifier, navController: NavController) {
+    Log.i("123", "adminScreen")
+
     val navItemList = listOf(
         NavItem("Orders", Icons.Default.ShoppingCart),
         NavItem("Products", Icons.Default.Info),

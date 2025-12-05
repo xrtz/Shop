@@ -1,5 +1,6 @@
 package com.example.shop.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,9 +41,11 @@ import com.example.shop.pages.ProfilePage
 import com.example.shop.pages.ShopPage
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import kotlin.math.log
 
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier, navController: NavController) {
+    Log.i("123", "homeScreen")
     val navItemList = listOf(
         NavItem(stringResource(R.string.label_nav_shop), Icons.Default.ShoppingCart),
         NavItem(stringResource(R.string.label_nav_favorites), Icons.Default.FavoriteBorder),

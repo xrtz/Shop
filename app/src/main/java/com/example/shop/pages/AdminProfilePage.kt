@@ -43,13 +43,10 @@ import org.w3c.dom.Text
 
 @Composable
 fun AdminProfilePage(modifier: Modifier = Modifier) {
-    val context = LocalContext.current
     val userModel = remember {
         mutableStateOf(UserModel())
     }
-    var addressInput by remember {
-        mutableStateOf(userModel.value.address)
-    }
+
     LaunchedEffect(key1 = Unit) {
         Firebase.firestore.collection("users")
             .document(FirebaseAuth.getInstance().currentUser?.uid!!).get().addOnCompleteListener {
@@ -57,7 +54,6 @@ fun AdminProfilePage(modifier: Modifier = Modifier) {
                     val result = it.result.toObject(UserModel::class.java)
                     if (result != null){
                         userModel.value = result
-                        addressInput = userModel.value.address
                     }
                 }
 
