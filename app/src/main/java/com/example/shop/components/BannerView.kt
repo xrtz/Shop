@@ -23,6 +23,7 @@ import com.google.firebase.firestore.firestore
 import com.tbuonomo.viewpagerdotsindicator.compose.DotsIndicator
 import com.tbuonomo.viewpagerdotsindicator.compose.model.DotGraphic
 import com.tbuonomo.viewpagerdotsindicator.compose.type.ShiftIndicatorType
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun BannerView(modifier: Modifier = Modifier) {
@@ -30,11 +31,19 @@ fun BannerView(modifier: Modifier = Modifier) {
         mutableStateOf<List<String>>(emptyList())
     }
 
-    LaunchedEffect(Unit) {
-        Firebase.firestore.collection("data")
-            .document("banner").get().addOnCompleteListener {
-                bannerList = it.result.get("urls") as List<String>
-            }
+//    LaunchedEffect(Unit) {
+//        Firebase.firestore.collection("data")
+//            .document("banner").get().addOnCompleteListener {
+//                bannerList = it.result.get("urls") as List<String>
+//            }
+//    }
+    LaunchedEffect(Unit){
+        val snapshot = Firebase.firestore
+            .collection("data")
+            .document("banner")
+            .get()
+            .await()
+        bannerList = snapshot.get("urls") as List<String>
     }
     Column (modifier = modifier.fillMaxWidth()){
         val pagerState = rememberPagerState(0) {

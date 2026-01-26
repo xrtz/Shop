@@ -17,6 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.shop.model.UserModel
+import com.example.shop.pages.AdminProductDetailsPage
 import com.example.shop.pages.BusketPage
 import com.example.shop.pages.CategoryProductPage
 import com.example.shop.pages.CheckoutPage
@@ -91,6 +92,10 @@ fun Navigation(modifier: Modifier = Modifier) {
             composable("product-details/{productId}") {
                 var productId = it.arguments?.getString("productId")
                 ProductDetailsPage(modifier, productId ?: "")
+            }
+            composable("admin-product-details/{productId}") {
+                var productId = it.arguments?.getString("productId")
+                AdminProductDetailsPage(modifier, productId ?: "")
             }
             composable("checkout") {
                 CheckoutPage(modifier)

@@ -39,6 +39,7 @@ import androidx.navigation.NavController
 import com.example.shop.R
 import com.example.shop.pages.AddProductPage
 import com.example.shop.pages.AdminOrdersPage
+import com.example.shop.pages.AdminProductPage
 import com.example.shop.pages.AdminProfilePage
 import com.example.shop.pages.BusketPage
 import com.example.shop.pages.FavoritesPage
@@ -90,7 +91,7 @@ fun AdminScreen(modifier: Modifier = Modifier, navController: NavController) {
 fun ContentScreen2(modifier: Modifier = Modifier, selectedBar: Int) {
     when(selectedBar){
         0-> AdminOrdersPage(modifier)
-        1-> ProductPage(modifier)
+        1-> AdminProductPage(modifier)
         2-> AddProductPage(modifier)
         3-> AdminProfilePage(modifier)
     }

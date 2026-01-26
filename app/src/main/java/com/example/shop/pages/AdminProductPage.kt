@@ -19,6 +19,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.shop.R
+import com.example.shop.components.AdminProductItemView
 import com.example.shop.components.BannerView
 import com.example.shop.components.CategoriesView
 import com.example.shop.components.HeaderView
@@ -28,7 +29,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
 @Composable
-fun ProductPage(modifier: Modifier = Modifier) {
+fun AdminProductPage(modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
         HeaderView(modifier)
         val productsList = remember{
@@ -49,7 +50,7 @@ fun ProductPage(modifier: Modifier = Modifier) {
             items(productsList.value.chunked(2)){ rowItems ->
                 Row{
                     rowItems.forEach{
-                        ProductItemView(product = it, modifier = Modifier.weight(1f))
+                        AdminProductItemView(product = it, modifier = Modifier.weight(1f))
                     }
                     if (rowItems.size == 1){
                         Spacer(modifier = Modifier.weight(1f))

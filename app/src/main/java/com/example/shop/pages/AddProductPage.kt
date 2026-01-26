@@ -68,22 +68,23 @@ fun AddProductPage(modifier: Modifier = Modifier) {
     }
     Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
         TextField(value = productName,
+            placeholder = { Text("Введите название продукта") },
             modifier = Modifier.fillMaxWidth(),
             onValueChange = {productName = it})
         Spacer(modifier = Modifier.height(10.dp))
-        TextField(value = descriptions,
+        TextField(value = descriptions,placeholder = { Text("Введите описание продукта") },
             modifier = Modifier.fillMaxWidth(),
             onValueChange = {descriptions = it})
         Spacer(modifier = Modifier.height(10.dp))
-        TextField(value = price,
+        TextField(value = price, placeholder = { Text("Введите цену продукта") },
             modifier = Modifier.fillMaxWidth(),
             onValueChange = {price = it})
         Spacer(modifier = Modifier.height(10.dp))
-        TextField(value = actualPrice,
+        TextField(value = actualPrice, placeholder = { Text("Введите актуальную цену продукта") },
             modifier = Modifier.fillMaxWidth(),
             onValueChange = {actualPrice = it})
         Spacer(modifier = Modifier.height(10.dp))
-        TextField(value = image,
+        TextField(value = image, placeholder = { Text("Введите ссылку на картинку") },
             modifier = Modifier.fillMaxWidth(),
             onValueChange = {image = it})
         Spacer(modifier = Modifier.height(10.dp))
@@ -112,7 +113,7 @@ fun AddProductPage(modifier: Modifier = Modifier) {
         }
         Spacer(modifier=Modifier.height(20.dp))
         OutlinedButton(onClick = {
-            val ProductModel = ProductModel(UUID.randomUUID().toString(), productName, descriptions, selected.name, actualPrice, price, listOf(image))
+            val ProductModel = ProductModel(UUID.randomUUID().toString(), productName, descriptions, selected.name.lowercase(), actualPrice, price, listOf(image))
             Firebase.firestore
                 .collection("data")
                 .document("stock")

@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,42 +30,65 @@ import com.example.shop.components.ProductItemView
 import com.example.shop.model.ProductModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.tasks.await
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.items
 
 @Composable
 fun ShopPage(modifier: Modifier = Modifier) {
-    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
-        HeaderView(modifier)
-        Spacer(modifier = Modifier.height(10.dp))
-        BannerView(modifier = Modifier.height(200.dp))
-        Text(text = stringResource(R.string.word_Category), style = TextStyle(fontSize = 16.sp))
-        Spacer(modifier = Modifier.height(10.dp))
-        CategoriesView(modifier)
-        val productsList = remember{
-            mutableStateOf<List<ProductModel>>(emptyList())
+    val productsList = remember{
+        mutableStateOf<List<ProductModel>>(emptyList())
+    }
+    LaunchedEffect(Unit) {
+        val snapshot = Firebase.firestore
+            .collection("data")
+            .document("stock")
+            .collection("products")
+            .get()
+            .await()
+        productsList.value = snapshot.documents.mapNotNull {
+            it.toObject(ProductModel::class.java)
         }
-        LaunchedEffect(key1 = Unit) {
-            Firebase.firestore.collection("data").document("stock")
-                .collection("products").get().addOnCompleteListener {
-                    if (it.isSuccessful){
-                        val resultList = it.result.documents.mapNotNull {
-                                doc-> doc.toObject(ProductModel::class.java)
-                        }
-                        productsList.value = resultList.plus(resultList).plus(resultList)
-                    }
-                }
-        }
-        LazyColumn (modifier = Modifier.fillMaxSize().padding(4.dp)){
-            items(productsList.value.chunked(2)){ rowItems ->
-                Row{
-                    rowItems.forEach{
-                        ProductItemView(product = it, modifier = Modifier.weight(1f))
-                    }
-                    if (rowItems.size == 1){
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
+    }
 
+    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
+        HeaderView()
+        Spacer(modifier = Modifier.height(10.dp))
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(8.dp)
+        ){
+            item(span = {GridItemSpan(2)}){
+            BannerView(modifier = Modifier.height(200.dp))
+        }
+        item (span = {GridItemSpan(2)}){
+            Spacer(Modifier.height(10.dp))
+        }
+
+        item(span = {GridItemSpan(2)}){
+            Text(
+                text = stringResource(R.string.word_Category),
+                fontSize = 16.sp
+            )
+        }
+        item(span = {GridItemSpan(2)}){
+            CategoriesView()
+        }
+            items(
+                items = productsList.value,
+                key = {it.id}
+
+            ){
+                product ->
+                ProductItemView(
+                    product,
+                    Modifier.padding(8.dp)
+                )
             }
         }
+
     }
 }

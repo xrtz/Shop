@@ -23,18 +23,20 @@ import com.example.shop.R
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun HeaderView(modifier: Modifier = Modifier) {
     var name by remember {
         mutableStateOf("")
     }
-    LaunchedEffect(Unit) {
-        Firebase.firestore.collection("users")
+    LaunchedEffect(Unit){
+        val snapshot = Firebase.firestore
+            .collection("users")
             .document(FirebaseAuth.getInstance().currentUser?.uid!!)
-            .get().addOnCompleteListener {
-                name = it.result.get("name").toString()
-            }
+            .get()
+            .await()
+        name = snapshot.get("name").toString()
     }
     Row (modifier = Modifier.fillMaxWidth()
         , verticalAlignment = Alignment.CenterVertically,
