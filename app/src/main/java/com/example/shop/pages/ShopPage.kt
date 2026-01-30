@@ -35,22 +35,23 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.shop.repository.Repository
+import com.example.shop.viewmodel.ShopViewModel
+import com.example.shop.viewmodel.ShopViewModelFactory
 
 @Composable
 fun ShopPage(modifier: Modifier = Modifier) {
-    val productsList = remember{
-        mutableStateOf<List<ProductModel>>(emptyList())
-    }
+
+    val vm: ShopViewModel = viewModel(
+        factory = ShopViewModelFactory(Repository())
+    )
+    val productsList by vm.products.collectAsState()
     LaunchedEffect(Unit) {
-        val snapshot = Firebase.firestore
-            .collection("data")
-            .document("stock")
-            .collection("products")
-            .get()
-            .await()
-        productsList.value = snapshot.documents.mapNotNull {
-            it.toObject(ProductModel::class.java)
-        }
+        vm.loadProducts()
+        vm.getUser()
     }
 
     Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
@@ -75,10 +76,10 @@ fun ShopPage(modifier: Modifier = Modifier) {
             )
         }
         item(span = {GridItemSpan(2)}){
-            CategoriesView()
+            CategoriesView(modifier, vm)
         }
             items(
-                items = productsList.value,
+                items = productsList,
                 key = {it.id}
 
             ){

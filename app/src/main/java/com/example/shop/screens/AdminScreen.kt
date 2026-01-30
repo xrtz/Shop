@@ -43,7 +43,6 @@ import com.example.shop.pages.AdminProductPage
 import com.example.shop.pages.AdminProfilePage
 import com.example.shop.pages.BusketPage
 import com.example.shop.pages.FavoritesPage
-import com.example.shop.pages.ProductPage
 import com.example.shop.pages.ProfilePage
 import com.example.shop.pages.ShopPage
 import com.google.firebase.Firebase

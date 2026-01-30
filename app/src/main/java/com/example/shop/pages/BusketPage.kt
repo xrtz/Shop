@@ -1,76 +1,109 @@
 package com.example.shop.pages
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusModifier
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.shop.GlobalNavigation
 import com.example.shop.components.BusketItemView
+import com.example.shop.model.ProductModel
 import com.example.shop.model.UserModel
+import com.example.shop.repository.Repository
+import com.example.shop.viewmodel.ShopViewModel
+import com.example.shop.viewmodel.ShopViewModelFactory
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
+
+//@Composable
+//fun BusketPage() {
+//
+//    val vm: ShopViewModel = viewModel(
+//        factory = ShopViewModelFactory(Repository())
+//    )
+//
+//    val products by vm.products.collectAsState()
+//    LaunchedEffect(Unit) { vm.loadProducts() }
+//
+//    val user = remember { mutableStateOf(UserModel()) }
+//
+//    DisposableEffect(Unit) {
+//        val l = Firebase.firestore.collection("users")
+//            .document(FirebaseAuth.getInstance().currentUser!!.uid)
+//            .addSnapshotListener { s, _ ->
+//                s?.toObject(UserModel::class.java)?.let { user.value = it }
+//            }
+//        onDispose { l.remove() }
+//    }
+//
+//    val cartItems = user.value.cartItems.toList()
+//        .mapNotNull { (id, qty) ->
+//            products.find { it.id == id }?.let { it to qty }
+//        }
+//
+//    Column(Modifier.fillMaxSize().padding(16.dp)) {
+//        Text("Your basket", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+//
+//        if (cartItems.isEmpty()) {
+//            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+//                Text("Empty")
+//            }
+//        } else {
+//            LazyColumn(Modifier.weight(1f)) {
+//                items(cartItems, key = { it.first.id }) {
+//                    BusketItemView(it.first, it.second, vm)
+//                }
+//            }
+//
+//            OutlinedButton(
+//                modifier = Modifier.fillMaxWidth().height(50.dp),
+//                onClick = { GlobalNavigation.navController.navigate("checkout") }
+//            ) {
+//                Text("Checkout")
+//            }
+//        }
+//    }
+//}
 
 @Composable
 fun BusketPage(modifier: Modifier = Modifier) {
-    val userModel = remember{
-        mutableStateOf(UserModel())
-    }
-    DisposableEffect(key1 = Unit) {
-        var listener = Firebase.firestore.collection("users")
-            .document(FirebaseAuth.getInstance().currentUser?.uid!!)
-            .addSnapshotListener() { it, _ ->
-                if (it != null){
-                    val result = it.toObject(UserModel::class.java)
-                    if (result != null){
-                    userModel.value = result}
-                }
-            }
-        onDispose{
-            listener.remove()
-        }
-    }
-    Column(modifier = modifier.fillMaxSize().padding(16.dp)){
-        Text(text = "Your basket", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-        if (userModel.value.cartItems.isNotEmpty())
-        {
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                items(userModel.value.cartItems.toList(), key = {it.first}){ (productId, qty)->
-                    BusketItemView(productId = productId, qty =  qty)
-                }
-            }
-            OutlinedButton(onClick = {
-                GlobalNavigation.navController.navigate("checkout")
-            }, modifier = Modifier.fillMaxWidth().height(50.dp)) {
-                Text(text = "Checkout")
-            }
-        }
-        else{
-            Column (modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center){
-                Text(text = "Empty")
-            }
-        }
+    val vm: ShopViewModel = viewModel(factory = ShopViewModelFactory(Repository()))
+    val products by vm.products.collectAsState()
+    val cart by vm.cartItems.collectAsState()
 
+    val cartItems = cart.mapNotNull { (id, qty) ->
+        products.find { it.id == id }?.let { it to qty }
+    }
+
+    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
+        Text("Your basket", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+
+        if (cartItems.isNotEmpty()) {
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                items(cartItems, key = { it.first.id }) {
+                    BusketItemView(it.first, it.second, vm)
+                }
+            }
+
+            OutlinedButton(
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                onClick = { GlobalNavigation.navController.navigate("checkout") }
+            ) {
+                Text("Checkout")
+            }
+        } else {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Empty")
+            }
+        }
     }
 }
+

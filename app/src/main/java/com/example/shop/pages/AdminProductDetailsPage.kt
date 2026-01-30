@@ -17,11 +17,13 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,10 +37,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.shop.Util
 import com.example.shop.model.CategoryModel
 import com.example.shop.model.ProductModel
+import com.example.shop.repository.Repository
+import com.example.shop.viewmodel.ProductDetailsViewModel
+import com.example.shop.viewmodel.ProductDetailsViewModelFactory
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.tbuonomo.viewpagerdotsindicator.compose.DotsIndicator
@@ -47,51 +53,45 @@ import com.tbuonomo.viewpagerdotsindicator.compose.type.ShiftIndicatorType
 import kotlinx.coroutines.tasks.await
 
 @Composable
-fun AdminProductDetailsPage(modifier: Modifier = Modifier, productId: String) {
-    var context = LocalContext.current
-    var product by remember{
-        mutableStateOf(ProductModel())
-    }
-    LaunchedEffect(key1 = productId) {
-        try {
-            val snapshot = Firebase.firestore.collection("data")
-                .document("stock")
-                .collection("products")
-                .document(productId)
-                .get()
-                .await()
+fun AdminProductDetailsPage(productId: String,
+                            modifier: Modifier = Modifier,
+                            viewModel: ProductDetailsViewModel = viewModel(factory = ProductDetailsViewModelFactory(
+                                Repository()
+                            )
+                            )
+) {
+    val product by viewModel.product.collectAsState()
 
-            val result = snapshot.toObject(ProductModel::class.java)
-            if (result != null) {
-                product = result
-            }
-        } catch (e: Exception) {
-            Log.e("AdminProductDetailsPage", "Error loading product", e)
-        }
+    LaunchedEffect(productId) {
+        viewModel.loadProduct(productId)
     }
+
+    val currentProduct = product ?: ProductModel()
+
     Column(modifier = modifier.padding(16.dp).fillMaxSize()) {
-        Text(text = product.title,
+        Text(
+            text = currentProduct.title,
             fontSize = 20.sp,
-            modifier = Modifier.padding(8.dp))
+            modifier = Modifier.padding(8.dp)
+        )
+
         Spacer(modifier = Modifier.height(8.dp))
-        Column (modifier = modifier.fillMaxWidth()){
-            val pagerState = rememberPagerState(0) {
-                product.images.size
-            }
-            HorizontalPager(
-                state = pagerState,
-                pageSpacing = 24.dp,
-            ) {
+
+        if (currentProduct.images.isNotEmpty()) {
+            val pagerState = rememberPagerState(0) { currentProduct.images.size }
+
+            HorizontalPager(state = pagerState, pageSpacing = 24.dp) {
                 AsyncImage(
-                    model = product.images.get(it),
+                    model = currentProduct.images[it],
                     contentDescription = "",
                     modifier = Modifier.height(220.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp))
                 )
-
             }
+
             Spacer(modifier = Modifier.height(10.dp))
+
             DotsIndicator(
-                dotCount = product.images.size,
+                dotCount = currentProduct.images.size,
                 type = ShiftIndicatorType(
                     DotGraphic(
                         color = MaterialTheme.colorScheme.primary,
@@ -101,51 +101,54 @@ fun AdminProductDetailsPage(modifier: Modifier = Modifier, productId: String) {
                 pagerState = pagerState
             )
         }
+
         Spacer(modifier = Modifier.height(8.dp))
-        Row (modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically){
-            Text(text = product.price,
+
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = currentProduct.price,
                 fontSize = 18.sp,
-                style = TextStyle(textDecoration = TextDecoration.LineThrough)
+                style = LocalTextStyle.current.copy(textDecoration = TextDecoration.LineThrough)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = product.actualPrice,
+            Text(
+                text = currentProduct.actualPrice,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             )
             Spacer(modifier = Modifier.weight(1f))
-//            IconButton(onClick = {
-//                Util.addToFav(context, productId)
-//            }) {
-//                Icon(imageVector = Icons.Default.FavoriteBorder,
-//                    contentDescription = "+ <3")
+//            IconButton(onClick = { viewModel.toggleFavorite(currentProduct.id) }) {
+//                Icon(
+//                    imageVector = Icons.Default.FavoriteBorder,
+//                    contentDescription = "Add to Favorites"
+//                )
 //            }
         }
+
         Spacer(modifier = Modifier.height(8.dp))
-//        OutlinedButton(onClick = {
-//            Util.addToCard(context, productId = productId)
-//        }, modifier = Modifier.fillMaxWidth().height(50.dp)) {
+
+//        OutlinedButton(
+//            onClick = { viewModel.addToCart(currentProduct.id) },
+//            modifier = Modifier.fillMaxWidth().height(50.dp)
+//        ) {
 //            Text(text = "+")
 //        }
+
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Description:", fontSize = 18.sp,
-            fontWeight = FontWeight.Bold) ///////////////////////////
+
+        Text(text = "Description:", fontSize = 18.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = product.description, fontSize = 18.sp)
-        Spacer(modifier = Modifier.height(8.dp))
-        if (product.otherDetails.isNotEmpty()){
-            Text(text = "Other details:",
-                fontWeight = FontWeight.Bold)
-        }
-        product.otherDetails.forEach{
-                (key, value) ->
-            Row(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
-                Text(text = key + ": ", fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold)
-                Text(text = value, fontSize = 16.sp)
+        Text(text = currentProduct.description, fontSize = 18.sp)
+
+        if (currentProduct.otherDetails.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Other details:", fontWeight = FontWeight.Bold)
+            currentProduct.otherDetails.forEach { (key, value) ->
+                Row(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
+                    Text(text = "$key: ", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                    Text(text = value, fontSize = 16.sp)
+                }
             }
         }
     }
-
-
 }

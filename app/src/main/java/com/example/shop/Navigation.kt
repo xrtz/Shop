@@ -1,5 +1,6 @@
 package com.example.shop
 
+import ProductDetailsPage
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,7 +23,6 @@ import com.example.shop.pages.BusketPage
 import com.example.shop.pages.CategoryProductPage
 import com.example.shop.pages.CheckoutPage
 import com.example.shop.pages.OrderPage
-import com.example.shop.pages.ProductDetailsPage
 import com.example.shop.screens.AdminScreen
 import com.example.shop.screens.AuthScreen
 import com.example.shop.screens.HomeScreen
@@ -91,14 +91,14 @@ fun Navigation(modifier: Modifier = Modifier) {
             }
             composable("product-details/{productId}") {
                 var productId = it.arguments?.getString("productId")
-                ProductDetailsPage(modifier, productId ?: "")
+                ProductDetailsPage(productId ?: "", modifier )
             }
             composable("admin-product-details/{productId}") {
                 var productId = it.arguments?.getString("productId")
-                AdminProductDetailsPage(modifier, productId ?: "")
+                AdminProductDetailsPage(productId ?: "", modifier )
             }
             composable("checkout") {
-                CheckoutPage(modifier)
+                CheckoutPage()
             }
             composable("orders") {
                 OrderPage(modifier)

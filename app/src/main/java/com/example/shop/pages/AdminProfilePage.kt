@@ -17,6 +17,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,9 +34,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.shop.GlobalNavigation
 import com.example.shop.R
 import com.example.shop.model.UserModel
+import com.example.shop.repository.Repository
+import com.example.shop.viewmodel.ShopViewModel
+import com.example.shop.viewmodel.ShopViewModelFactory
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
@@ -43,21 +48,13 @@ import org.w3c.dom.Text
 
 @Composable
 fun AdminProfilePage(modifier: Modifier = Modifier) {
-    val userModel = remember {
-        mutableStateOf(UserModel())
-    }
+    val vm: ShopViewModel = viewModel(
+        factory = ShopViewModelFactory(Repository())
+    )
+    val user by vm.user.collectAsState()
 
-    LaunchedEffect(key1 = Unit) {
-        Firebase.firestore.collection("users")
-            .document(FirebaseAuth.getInstance().currentUser?.uid!!).get().addOnCompleteListener {
-                if (it.isSuccessful){
-                    val result = it.result.toObject(UserModel::class.java)
-                    if (result != null){
-                        userModel.value = result
-                    }
-                }
-
-            }
+    LaunchedEffect(Unit) {
+        vm.getUser()
     }
     Column (modifier = modifier.fillMaxSize().padding(16.dp)){
         Text(text = "Your profile", fontSize = 20.sp, fontWeight = FontWeight.Bold)
@@ -65,11 +62,11 @@ fun AdminProfilePage(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .height(200.dp)
                 .fillMaxWidth().padding(16.dp).clip(RoundedCornerShape(16.dp)))
-        Text(text = userModel.value.name, fontSize = 26.sp, fontWeight = FontWeight.Bold,
+        Text(text = user?.name ?: "", fontSize = 26.sp, fontWeight = FontWeight.Bold,
             modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(text = "Email: \n ${userModel.value.email}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text(text = "Email: \n ${user?.email}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
         TextButton(onClick = {
             FirebaseAuth.getInstance().signOut()
             val navController = GlobalNavigation.navController

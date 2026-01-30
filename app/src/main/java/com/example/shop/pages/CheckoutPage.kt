@@ -15,6 +15,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,114 +28,79 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.shop.GlobalNavigation
 import com.example.shop.Util
 import com.example.shop.model.ProductModel
 import com.example.shop.model.UserModel
+import com.example.shop.repository.Repository
+import com.example.shop.viewmodel.CheckoutViewModel
+import com.example.shop.viewmodel.CheckoutViewModelFactory
+import com.example.shop.viewmodel.ShopViewModelFactory
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 @Composable
-fun CheckoutPage(modifier: Modifier = Modifier) {
+fun CheckoutPage(viewModel: CheckoutViewModel = viewModel(factory = CheckoutViewModelFactory(
+    Repository()
+)
+)) {
+    val state by viewModel.state.collectAsState()
+
+    val user = state.user
+    val subTotal = state.subTotal
+    val fullPrice = state.fullPrice
+    val discount = state.discount
+
     val context = LocalContext.current
-    val userModel = remember{
-        mutableStateOf(UserModel())
-    }
-    val productList = remember{
-        mutableStateListOf(ProductModel())
-    }
-    val subTotal = remember{
-        mutableStateOf(0f)
-    }
-    val withoutDiscont = remember{
-        mutableStateOf(0f)
-    }
-    val diffSum = remember{
-        mutableStateOf(0f)
-    }
-    fun calculateSubTotal()
-    {
-        productList.forEach{
-            if (it.actualPrice.isNotEmpty()){
-                val qty = userModel.value.cartItems[it.id]?: 0
-                subTotal.value += qty * it.actualPrice.toFloat()
-            }
-        }
-    }
-    fun withoutDiscontCalculate()
-    {
-        productList.forEach{
-            if (it.price.isNotEmpty()){
-                val qty = userModel.value.cartItems[it.id]?: 0
-                withoutDiscont.value += qty * it.price.toFloat()
-            }
-        }
-    }
-    fun calculateDiff(){
-        diffSum.value = withoutDiscont.value - subTotal.value
-    }
 
-    LaunchedEffect(key1 = Unit) {
-        Firebase.firestore.collection("users")
-            .document(FirebaseAuth.getInstance().currentUser?.uid!!)
-            .get().addOnCompleteListener {
-                if (it.isSuccessful){
-                    val result = it.result.toObject(UserModel::class.java)
-                    if (result != null){
-                        userModel.value = result
-                        Firebase.firestore.collection("data").document("stock")
-                            .collection("products")
-                            .whereIn("id", userModel.value.cartItems.keys.toList())
-                            .get().addOnCompleteListener { task ->
-                                if (task.isSuccessful){
-                                    val resultProducts = task.result.toObjects(ProductModel::class.java)
-                                    productList.addAll(resultProducts)
-                                    calculateSubTotal()
-                                    withoutDiscontCalculate()
-                                    calculateDiff()
-
-                                }
-                            }
-                    }
-                }
-            }
-    }
-    Column(modifier = modifier
+    Column(modifier = Modifier
         .fillMaxSize()
         .padding(16.dp)) {
-        Text(text = "Checkout", fontSize = 22.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "Deliver to: ", fontWeight = FontWeight.Bold)
-        Text(text = "${userModel.value.name}")
-        Text(text = "${userModel.value.address}")
-        Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider()
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
-            Text(text = "Total", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            Text(text = withoutDiscont.value.toString(), fontSize = 16.sp)
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
-            Text(text = "Discount", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            Text(text = diffSum.value.toString(), fontSize = 16.sp)
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider()
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "-> ${subTotal.value}", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(),
-            fontSize = 22.sp, fontWeight = FontWeight.Bold)
 
-        OutlinedButton ( onClick = {
-            Util.clearBusketAndAddToOrder()
-            Toast.makeText(context, "Comlited", Toast.LENGTH_SHORT).show()
-            val navController = GlobalNavigation.navController
-            navController.popBackStack()
-            navController.navigate("home")
-        }
-        ) {  Text(text = "To Pay", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())}
+        Text("Checkout", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(16.dp))
 
+        if (user != null) {
+            Text("Deliver to: ", fontWeight = FontWeight.Bold)
+            Text("${user.name}")
+            Text("${user.address}")
+        }
+
+        Spacer(Modifier.height(16.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(16.dp))
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+            Text("Total", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(fullPrice.toString(), fontSize = 16.sp)
+        }
+
+        Spacer(Modifier.height(16.dp))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+            Text("Discount", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(discount.toString(), fontSize = 16.sp)
+        }
+
+        Spacer(Modifier.height(16.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(16.dp))
+
+        Text("-> $subTotal", fontSize = 22.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+
+        OutlinedButton(
+            onClick = {
+                viewModel.completeOrder()
+                Toast.makeText(context, "Completed", Toast.LENGTH_SHORT).show()
+                val navController = GlobalNavigation.navController
+                navController.popBackStack()
+                navController.navigate("home")
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("To Pay", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        }
     }
 }

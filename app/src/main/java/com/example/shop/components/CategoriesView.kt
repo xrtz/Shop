@@ -20,6 +20,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,30 +33,26 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.shop.GlobalNavigation
 import com.example.shop.model.CategoryModel
+import com.example.shop.viewmodel.ShopViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
 
 @Composable
-fun CategoriesView(modifier: Modifier = Modifier) {
-    val categoriesList = remember{
-        mutableStateOf<List<CategoryModel>>(emptyList())
-    }
+fun CategoriesView(modifier: Modifier = Modifier,
+                   vm: ShopViewModel) {
+
+    val categories by vm.categories.collectAsState()
+
     LaunchedEffect(Unit) {
-        val snapshot = Firebase.firestore
-            .collection("data")
-            .document("stock")
-            .collection("categories")
-            .get()
-            .await()
-        categoriesList.value = snapshot.documents.mapNotNull {
-            it.toObject(CategoryModel::class.java) }
+        vm.loadCategories()
     }
+
 
     LazyRow (modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(15.dp)){
         items(
-            categoriesList.value,
+            categories,
             key = {it.id}
         ) {
             item ->CategoryItem(item)
